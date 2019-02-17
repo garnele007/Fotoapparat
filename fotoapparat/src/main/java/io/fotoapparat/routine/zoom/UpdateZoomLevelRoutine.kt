@@ -1,10 +1,10 @@
 package io.fotoapparat.routine.zoom
 
-import android.support.annotation.FloatRange
+import androidx.annotation.FloatRange
 import io.fotoapparat.exception.LevelOutOfRangeException
 import io.fotoapparat.hardware.Device
-import kotlinx.coroutines.experimental.runBlocking
-
+import io.fotoapparat.parameter.Zoom
+import kotlinx.coroutines.runBlocking
 
 /**
  * Updates zoom level of the camera. If zoom is not supported - does nothing.
@@ -17,7 +17,7 @@ internal fun Device.updateZoomLevel(
     zoomLevel.ensureInBounds()
     val cameraDevice = awaitSelectedCamera()
 
-    if (cameraDevice.getCapabilities().canZoom) {
+    if (cameraDevice.getCapabilities().zoom is Zoom.VariableZoom) {
         cameraDevice.setZoom(zoomLevel)
     }
 }

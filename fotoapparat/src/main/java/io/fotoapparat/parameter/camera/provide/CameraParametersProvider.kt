@@ -10,7 +10,6 @@ import io.fotoapparat.parameter.Resolution
 import io.fotoapparat.parameter.camera.CameraParameters
 import io.fotoapparat.selector.*
 
-
 /**
  * @return [CameraParameters] which will be used by [CameraDevice].
  */
@@ -32,6 +31,7 @@ internal fun getCameraParameters(
                     flashMode = flashMode selectFrom flashModes,
                     focusMode = focusMode selectFrom focusModes,
                     jpegQuality = jpegQuality selectFrom jpegQualityRange,
+                    exposureCompensation = exposureCompensation selectFrom exposureCompensationRange,
                     previewFpsRange = previewFpsRange selectFrom previewFpsRanges,
                     antiBandingMode = antiBandingMode selectFrom antiBandingModes,
                     pictureResolution = selectedPictureResolution,

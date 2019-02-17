@@ -4,8 +4,8 @@ package io.fotoapparat.hardware
 
 import android.hardware.Camera
 import android.media.MediaRecorder
-import android.support.annotation.FloatRange
 import android.view.Surface
+import androidx.annotation.FloatRange
 import io.fotoapparat.capability.Capabilities
 import io.fotoapparat.capability.provide.getCapabilities
 import io.fotoapparat.characteristic.Characteristics
@@ -20,7 +20,7 @@ import io.fotoapparat.log.Logger
 import io.fotoapparat.parameter.FocusMode
 import io.fotoapparat.parameter.Resolution
 import io.fotoapparat.parameter.camera.CameraParameters
-import io.fotoapparat.parameter.camera.apply.applyNewParameters
+import io.fotoapparat.parameter.camera.apply.applyInto
 import io.fotoapparat.parameter.camera.convert.toCode
 import io.fotoapparat.preview.PreviewStream
 import io.fotoapparat.result.FocusResult
@@ -28,12 +28,11 @@ import io.fotoapparat.result.Photo
 import io.fotoapparat.util.FrameProcessor
 import io.fotoapparat.util.lineSeparator
 import io.fotoapparat.view.Preview
-import kotlinx.coroutines.experimental.CompletableDeferred
+import kotlinx.coroutines.CompletableDeferred
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
-
 
 typealias PreviewSize = io.fotoapparat.parameter.Resolution
 
@@ -51,7 +50,7 @@ internal open class CameraDevice(
     private lateinit var surface: Surface
     private lateinit var camera: Camera
 
-    private var cachedZoomParameters: Camera.Parameters? = null
+    private var cachedCameraParameters: Camera.Parameters? = null
     private var displayOrientation: Orientation = Portrait
     private var imageOrientation: Orientation = Portrait
     private var previewOrientation: Orientation = Portrait
@@ -82,7 +81,7 @@ internal open class CameraDevice(
      */
     open fun close() {
         logger.recordMethod()
-
+        surface.release()
         camera.release()
     }
 
@@ -169,7 +168,9 @@ internal open class CameraDevice(
 
         logger.log("New camera parameters are: $cameraParameters")
 
-        camera.updateParameters(cameraParameters)
+        cameraParameters.applyInto(cachedCameraParameters ?: camera.parameters)
+                .cacheLocally()
+                .setInCamera()
     }
 
     /**
@@ -297,14 +298,20 @@ internal open class CameraDevice(
     }
 
     private fun setZoomUnsafe(@FloatRange(from = 0.0, to = 1.0) level: Float) {
-        (cachedZoomParameters ?: camera.parameters)
+        (cachedCameraParameters ?: camera.parameters)
                 .apply {
                     zoom = (maxZoom * level).toInt()
                 }
-                .let {
-                    cachedZoomParameters = it
-                    camera.parameters = it
-                }
+                .cacheLocally()
+                .setInCamera()
+    }
+
+    private fun Camera.Parameters.cacheLocally() = apply {
+        cachedCameraParameters = this
+    }
+
+    private fun Camera.Parameters.setInCamera() = apply {
+        camera.parameters = this
     }
         
     open fun clearCachedZoomParameters() {
@@ -387,10 +394,6 @@ private fun Camera.takePhoto(imageRotation: Int): Photo {
     latch.await()
 
     return photoReference.get()
-}
-
-private fun Camera.updateParameters(newParameters: CameraParameters) {
-    parameters = parameters.applyNewParameters(newParameters)
 }
 
 @Throws(IOException::class)

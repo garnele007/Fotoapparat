@@ -1,20 +1,19 @@
 # Fotoapparat
 
-![Build status](https://travis-ci.org/Fotoapparat/Fotoapparat.svg?branch=master)
-
+![Build status](https://travis-ci.org/RedApparat/Fotoapparat.svg?branch=master)
 
 ![ ](sample/src/main/res/mipmap-xxxhdpi/ic_launcher.png)
 
-Camera API in Android is hard. Having 2 different API for new and old Camera does not make things any easier. But fret not, that is your lucky day! After several years of working with Camera we came up with Fotoapparat.
+Camera API in Android is hard. Having 2 different API for new and old Camera does not make things any easier. But fret not, that is your lucky day! After several years of working with Camera, we came up with Fotoapparat.
 
 What it provides:
+
 - Camera API which does not allow you to shoot yourself in the foot.
 - Simple yet powerful parameters customization.
 - Standalone custom `CameraView` which can be integrated into any `Activity`.
 - Fixes and workarounds for device-specific problems.
 - Both Kotlin and Java friendly configurations.
-- Last, but not least, non 0% test coverage. 
-
+- Last, but not least, non 0% test coverage.
 
 Taking picture becomes as simple as:
 
@@ -23,9 +22,9 @@ val fotoapparat = Fotoapparat(
     context = this,
     view = cameraView
 )
- 
+
 fotoapparat.start()
-    
+
 fotoapparat
     .takePicture()
     .saveToFile(someFile)
@@ -48,7 +47,7 @@ Add `CameraView` to your layout
 
 Configure `Fotoapparat` instance.
 
-```kotlin 
+```kotlin
 Fotoapparat(
             context = this,
             view = cameraView,                   // view which will draw the camera preview
@@ -61,11 +60,11 @@ Fotoapparat(
             ),
             cameraErrorCallback = { error -> }   // (optional) log fatal errors
     )
-``` 
+```
+
 Check the [wiki for the `configuration` options e.g. change iso](https://github.com/Fotoapparat/Fotoapparat/wiki/Configuration-Kotlin)
 
 Are you using Java only? See our [wiki for the java-friendly configuration](https://github.com/Fotoapparat/Fotoapparat/wiki/Configuration-Java).
-
 
 ### Step Three
 
@@ -76,43 +75,43 @@ override fun onStart() {
     super.onStart()
     fotoapparat.start()
 }
- 
+
 override fun onStop() {
     super.onStop()
     fotoapparat.stop()
 }
 ```
 
-### Take picture
+### Take a picture
 
-Finally we are ready to take picture. You have various options.
+Finally, we are ready to take a picture. You have various options.
 
 ```kotlin
 val photoResult = fotoapparat.takePicture()
- 
+
 // Asynchronously saves photo to file
 photoResult.saveToFile(someFile)
- 
-// Asynchronously converts photo to bitmap and returns result on main thread
+
+// Asynchronously converts photo to bitmap and returns the result on the main thread
 photoResult
     .toBitmap()
     .whenAvailable { bitmapPhoto ->
             val imageView = (ImageView) findViewById(R.id.result)
- 
+
             imageView.setImageBitmap(bitmapPhoto.bitmap)
             imageView.setRotation(-bitmapPhoto.rotationDegrees)
     }
-    
-// Of course you can also get a photo in a blocking way. Do not do it on main thread though.
+
+// Of course, you can also get a photo in a blocking way. Do not do it on the main thread though.
 val result = photoResult.toBitmap().await()
- 
-// Convert asynchronous events to RxJava 1.x/2.x types. 
-// See /fotoapparat-adapters/ module 
+
+// Convert asynchronous events to RxJava 1.x/2.x types.
+// See /fotoapparat-adapters/ module
 photoResult
         .toBitmap()
         .toSingle()
-        .subscribe { bitmapPhoto -> 
-            
+        .subscribe { bitmapPhoto ->
+
         }
 ```
 
@@ -125,23 +124,23 @@ fotoapparat.updateConfiguration(
         UpdateConfiguration(
                 flashMode = if (isChecked) torch() else off()
                 // ...
-                // all the parameters available in CameraConfiguration 
+                // all the parameters available in CameraConfiguration
         )
 )
 ```
 
-Or alternatively you may provide updates on an existing full configuration. 
+Or alternatively, you may provide updates on an existing full configuration.
 
 ```kotlin
 val configuration = CameraConfiguration(
     // A full configuration
     // ...
 )
- 
+
 fotoapparat.updateConfiguration(
     configuration.copy(
             flashMode = if (isChecked) torch() else off()
-            // all the parameters available in CameraConfiguration 
+            // all the parameters available in CameraConfiguration
     )
 )
 ```
@@ -162,11 +161,7 @@ fotoapparat.switchTo(
 Add dependency to your `build.gradle`
 
 ```groovy
-repositories {
-  maven { url 'https://jitpack.io' }
-}
- 
-compile 'io.fotoapparat.fotoapparat:library:2.2.0'
+implementation 'io.fotoapparat:fotoapparat:2.6.1'
 ```
 
 Camera permission will be automatically added to your `AndroidManifest.xml`. Do not forget to request this permission on Marshmallow and higher.

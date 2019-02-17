@@ -18,8 +18,7 @@ import io.fotoapparat.selector.LensPositionSelector
 import io.fotoapparat.util.FrameProcessor
 import io.fotoapparat.view.CameraRenderer
 import io.fotoapparat.view.FocalPointSelector
-import kotlinx.coroutines.experimental.CompletableDeferred
-
+import kotlinx.coroutines.CompletableDeferred
 
 /**
  * Phone.
@@ -150,7 +149,7 @@ internal open class Device(
     /**
      * @return The frame processor.
      */
-    open fun getFrameProcessor(): FrameProcessor = savedConfiguration.frameProcessor
+    open fun getFrameProcessor(): FrameProcessor? = savedConfiguration.frameProcessor
 
     /**
      * @return The desired from the user camera lens position.
@@ -167,6 +166,7 @@ internal fun updateConfiguration(
 ) = CameraConfiguration(
         flashMode = newConfiguration.flashMode ?: savedConfiguration.flashMode,
         focusMode = newConfiguration.focusMode ?: savedConfiguration.focusMode,
+        exposureCompensation = newConfiguration.exposureCompensation ?: savedConfiguration.exposureCompensation,
         frameProcessor = newConfiguration.frameProcessor ?: savedConfiguration.frameProcessor,
         previewFpsRange = newConfiguration.previewFpsRange ?: savedConfiguration.previewFpsRange,
         sensorSensitivity = newConfiguration.sensorSensitivity

@@ -1,9 +1,6 @@
 package io.fotoapparat.sample;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.SwitchCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -16,6 +13,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 import io.fotoapparat.Fotoapparat;
 import io.fotoapparat.configuration.CameraConfiguration;
 import io.fotoapparat.configuration.UpdateConfiguration;
@@ -28,6 +28,7 @@ import io.fotoapparat.result.BitmapPhoto;
 import io.fotoapparat.result.PhotoResult;
 import io.fotoapparat.result.WhenDoneListener;
 import io.fotoapparat.view.CameraView;
+import io.fotoapparat.view.FocusView;
 
 import static io.fotoapparat.log.LoggersKt.fileLogger;
 import static io.fotoapparat.log.LoggersKt.logcat;
@@ -55,9 +56,12 @@ public class ActivityJava extends AppCompatActivity {
     private final PermissionsDelegate permissionsDelegate = new PermissionsDelegate(this);
     private boolean hasCameraPermission;
     private CameraView cameraView;
+    private FocusView focusView;
+    private View capture;
 
     private Fotoapparat fotoapparat;
 
+    boolean activeCameraBack = true;
 
     private CameraConfiguration cameraConfiguration = CameraConfiguration
             .builder()
@@ -86,6 +90,8 @@ public class ActivityJava extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         cameraView = findViewById(R.id.cameraView);
+        focusView = findViewById(R.id.focusView);
+        capture = findViewById(R.id.capture);
         hasCameraPermission = permissionsDelegate.hasCameraPermission();
 
         if (hasCameraPermission) {
@@ -97,7 +103,6 @@ public class ActivityJava extends AppCompatActivity {
         fotoapparat = createFotoapparat();
 
         takePictureOnClick();
-        focusOnLongClick();
         switchCameraOnClick();
         toggleTorchOnSwitch();
         zoomSeekBar();
@@ -107,6 +112,7 @@ public class ActivityJava extends AppCompatActivity {
         return Fotoapparat
                 .with(this)
                 .into(cameraView)
+                .focusView(focusView)
                 .previewScaleType(ScaleType.CenterCrop)
                 .lensPosition(back())
                 .frameProcessor(new SampleFrameProcessor())
@@ -169,27 +175,17 @@ public class ActivityJava extends AppCompatActivity {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                activeCameraBack = !activeCameraBack;
                 fotoapparat.switchTo(
-                        front(),
+                        activeCameraBack ? back() : front(),
                         cameraConfiguration
                 );
             }
         });
     }
 
-    private void focusOnLongClick() {
-        cameraView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                fotoapparat.autoFocus();
-
-                return true;
-            }
-        });
-    }
-
     private void takePictureOnClick() {
-        cameraView.setOnClickListener(new View.OnClickListener() {
+        capture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 takePicture();

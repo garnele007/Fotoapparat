@@ -7,10 +7,12 @@ import io.fotoapparat.error.CameraErrorListener
 import io.fotoapparat.log.Logger
 import io.fotoapparat.log.none
 import io.fotoapparat.parameter.ScaleType
+import io.fotoapparat.preview.Frame
 import io.fotoapparat.selector.*
 import io.fotoapparat.util.FrameProcessor
 import io.fotoapparat.view.CameraRenderer
 import io.fotoapparat.view.CameraView
+import io.fotoapparat.view.FocusView
 import io.fotoapparat.preview.FrameProcessor as FrameProcessorJava
 
 /**
@@ -25,6 +27,7 @@ class FotoapparatBuilder internal constructor(private var context: Context) {
     )
     internal var cameraErrorCallback: CameraErrorCallback = {}
     internal var renderer: CameraRenderer? = null
+    internal var focusView: FocusView? = null
     internal var scaleType: ScaleType = ScaleType.CenterCrop
     internal var logger: Logger = none()
 
@@ -107,6 +110,15 @@ class FotoapparatBuilder internal constructor(private var context: Context) {
     }
 
     /**
+     * @param selector selects exposure compensation value from available range.
+     */
+    fun exposureCompensation(selector: ExposureSelector): FotoapparatBuilder = apply {
+        configuration = configuration.copy(
+                exposureCompensation = selector
+        )
+    }
+
+    /**
      * @param frameProcessor receives preview frames for processing.
      * @see FrameProcessorJava
      */
@@ -120,9 +132,9 @@ class FotoapparatBuilder internal constructor(private var context: Context) {
      * @param frameProcessor receives preview frames for processing.
      * @see FrameProcessorJava
      */
-    fun frameProcessor(frameProcessor: FrameProcessorJava): FotoapparatBuilder = apply {
+    fun frameProcessor(frameProcessor: FrameProcessorJava?): FotoapparatBuilder = apply {
         configuration = configuration.copy(
-                frameProcessor = { frameProcessor.process(it) }
+                frameProcessor = frameProcessor?.let { it::process }
         )
     }
 
@@ -155,6 +167,13 @@ class FotoapparatBuilder internal constructor(private var context: Context) {
             apply { this.renderer = renderer }
 
     /**
+     * @param focusView view which will be used for touch to focus.
+     * @see FocusView
+     */
+    fun focusView(focusView: FocusView): FotoapparatBuilder =
+            apply { this.focusView = focusView }
+
+    /**
      * @return set up instance of [Fotoapparat].
      * @throws IllegalStateException if some mandatory parameters are not specified.
      */
@@ -172,6 +191,7 @@ class FotoapparatBuilder internal constructor(private var context: Context) {
         return Fotoapparat(
                 context = context,
                 view = renderer,
+                focusView = focusView,
                 lensPosition = lensPositionSelector,
                 cameraConfiguration = configuration,
                 scaleType = scaleType,

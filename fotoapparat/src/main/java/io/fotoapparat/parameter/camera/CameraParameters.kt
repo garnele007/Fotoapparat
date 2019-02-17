@@ -5,7 +5,6 @@ import io.fotoapparat.parameter.*
 import io.fotoapparat.util.lineSeparator
 import io.fotoapparat.util.wrap
 
-
 /**
  * Parameters of [CameraDevice].
  */
@@ -13,6 +12,7 @@ data class CameraParameters(
         val flashMode: Flash,
         val focusMode: FocusMode,
         val jpegQuality: Int,
+        val exposureCompensation: Int,
         val previewFpsRange: FpsRange,
         val antiBandingMode: AntiBandingMode,
         val sensorSensitivity: Int?,
@@ -24,6 +24,7 @@ data class CameraParameters(
                 "flashMode:" + flashMode.wrap() +
                 "focusMode:" + focusMode.wrap() +
                 "jpegQuality:" + jpegQuality.wrap() +
+                "exposureCompensation:" + exposureCompensation.wrap() +
                 "previewFpsRange:" + previewFpsRange.wrap() +
                 "antiBandingMode:" + antiBandingMode.wrap() +
                 "sensorSensitivity:" + sensorSensitivity.wrap() +
